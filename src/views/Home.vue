@@ -61,9 +61,6 @@ export default {
     Tab,
     WeatherCard,
   },
-  data: () => ({
-    apiKey: '5941840a31d2f820bff5c473ea263075',
-  }),
   computed: {
     ...mapGetters(['city', 'country', 'currentDay', 'forecastDay']),
     error() {
@@ -78,12 +75,10 @@ export default {
 
       await this.getCurrentDay({
         city: this.city,
-        apiKey: this.apiKey,
       });
 
       await this.getForecastDay({
         coords: this.currentDay.coords,
-        apiKey: this.apiKey,
       });
     },
   },

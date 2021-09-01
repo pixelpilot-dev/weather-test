@@ -1,10 +1,8 @@
-import axios from 'axios';
+import { weather as weatherProvide } from '@/provide';
+import { API_KEY } from '@/utils/openWeatherApi';
 import COUNTRY_BY_CODE from '@/utils/countryByCode';
-import WEEK_DAYS from '@/utils/weekDays';
-import weatherIconUrl from '@/utils/weatherIconUrl';
 
-const dateTimeNow = (dt) => new Date(dt * 1000);
-const isNight = (dt) => dt.getHours() < 6 && dt.getHours() > 20;
+const datetimeNow = (dt) => new Date(dt * 1000);
 
 export default {
   state: {
@@ -34,47 +32,35 @@ export default {
     forecastDay: (state) => state.forecastDay,
   },
   actions: {
-    async getCurrentDay({ commit }, { city, apiKey }) {
+    async getCurrentDay({ commit }, { city }) {
       try {
-        const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`);
+        const { data } = await weatherProvide.getCurrentWeather(city, API_KEY);
 
-        const { data } = response;
-        const datetime = dateTimeNow(data.dt);
-
-        const currentDay = {
-          weatherIcon: weatherIconUrl(data.weather[0].main, isNight(datetime)),
+        const day = {
           weatherType: data.weather[0].main,
           temp: Math.ceil(data.main.temp),
-          weekDay: WEEK_DAYS[datetime.getDay()],
           coords: data.coord,
-          datetime,
+          datetime: datetimeNow(data.dt),
         };
 
         commit('setCountry', data.sys.country);
-        commit('setCurrentDay', currentDay);
+        commit('setCurrentDay', day);
       } catch (err) {
         commit('setCurrentDay', { error: 'City not found' });
       }
     },
-    async getForecastDay({ commit }, { coords, apiKey }) {
+    async getForecastDay({ commit }, { coords }) {
       try {
         const { lat, lon } = coords;
-        const response = await axios.get(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${apiKey}`);
-
-        const { data } = response;
-        const { daily } = data;
+        const { data } = await weatherProvide.getForecastWeather(lat, lon, API_KEY);
         const forecastDays = [];
 
-        daily.splice(1, 7).forEach((item) => {
-          const datetime = dateTimeNow(item.dt);
-
+        data.daily.splice(1, 7).forEach((item) => {
           forecastDays.push({
-            weatherIcon: weatherIconUrl(item.weather[0].main, isNight(datetime)),
             weatherType: item.weather[0].main,
             temp: Math.ceil(item.temp.day),
-            weekDay: WEEK_DAYS[datetime.getDay()],
             coords: null,
-            datetime,
+            datetime: datetimeNow(item.dt),
           });
         });
 

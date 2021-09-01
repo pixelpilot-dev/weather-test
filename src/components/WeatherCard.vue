@@ -1,17 +1,21 @@
 <template>
   <div class="weather-card" :class="classType">
     <div class="weather-card__icon">
-      <img :src="icon" :alt="item.weatherType" />
+      <img :src="weatherIcon" :alt="item.weatherType" />
     </div>
 
     <div class="weather-card__temperature">{{ temperatureByCelcium }}&deg;C</div>
     <div class="weather-card__type">{{ item.weatherType }}</div>
     
-    <div class="weather-card__date" v-if="type === 'simple'">{{ date }} <br> <b>{{ item.weekDay }}</b></div>
+    <div class="weather-card__date" v-if="type === 'simple'">{{ dateFormat }} <br> <b>{{ weekDay }}</b></div>
   </div>
 </template>
 
 <script>
+import WEEK_DAYS from '@/utils/weekDays';
+import weatherIconUrl from '@/utils/weatherIconUrl';
+const isNight = (dt) => dt.getHours() < 6 && dt.getHours() > 20;
+
 export default {
   name: 'WeatherCard',
   props: {
@@ -23,18 +27,23 @@ export default {
     },
   },
   computed: {
-    icon() {
-      return require(`@/assets/images/${this.item.weatherIcon}`)
-    },
     classType() {
       return `weather-card--${this.type}`
+    },
+    weatherIcon() {
+      const { item } = this;
+      const icon = weatherIconUrl(item.weatherType, isNight(item.datetime));
+      return require(`@/assets/images/${icon}`);
     },
     temperatureByCelcium() {
       return Math.round(this.item.temp - 273.15)
     },
-    date() {
+    dateFormat() {
       return this.item.datetime.toLocaleString('en-us', {year: 'numeric', month: '2-digit', day: '2-digit'})
-    }
+    },
+    weekDay() {
+      return WEEK_DAYS[this.item.datetime.getDay()];
+    },
   },
 }
 </script>
