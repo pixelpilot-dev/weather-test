@@ -4,7 +4,7 @@
       type="text"
       class="search-field__input"
       :class="{ 'search-field__input--has-error': error }"
-      v-model="field"
+      v-model.trim="field"
       :name="name"
       :placeholder="placeholder"
       :disabled="isDisabled"
@@ -22,7 +22,6 @@
 </template>
 
 <script>
-import debounce from 'lodash/debounce';
 import SvgIcon from '@/components/SvgIcon.vue';
 
 const MIN_SEARCH_LENGTH = 2;
@@ -71,13 +70,13 @@ export default {
     },
   },
   methods: {
-    searchRequest: debounce(function () {
+    searchRequest() {
       if (!isValidSearchText(this.field)) {
         return;
       }
 
       this.$emit('onChange', this.field);
-    }, 1000),
+    }
   },
 };
 </script>

@@ -47,6 +47,7 @@
 </template>
 
 <script>
+import debounce from 'lodash/debounce';
 import { mapActions, mapGetters, mapMutations } from 'vuex';
 import SearchField from '@/components/SearchField.vue';
 import Tabs from '@/components/Tabs/Tabs.vue';
@@ -70,7 +71,7 @@ export default {
   methods: {
     ...mapActions(['getCurrentDay', 'getForecastDay']),
     ...mapMutations(['setCity']),
-    async searchCity(value) {
+    searchCity: debounce(async function (value) {
       this.setCity(value);
 
       await this.getCurrentDay({
@@ -80,7 +81,7 @@ export default {
       await this.getForecastDay({
         coords: this.currentDay.coords,
       });
-    },
+    }, 1000),
   },
 };
 </script>
