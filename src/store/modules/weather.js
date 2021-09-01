@@ -1,6 +1,4 @@
-import { weather as weatherProvide } from '@/provide';
-import { API_KEY } from '@/utils/openWeatherApi';
-import COUNTRY_BY_CODE from '@/utils/countryByCode';
+import { weather as weatherProvide, country as countryProvide } from '@/provide';
 
 const datetimeNow = (dt) => new Date(dt * 1000);
 
@@ -27,14 +25,18 @@ export default {
   },
   getters: {
     city: (state) => state.city,
-    country: (state) => COUNTRY_BY_CODE[state.country] || '',
+    country: (state) => state.country,
     currentDay: (state) => state.currentDay,
     forecastDay: (state) => state.forecastDay,
   },
   actions: {
-    async getCurrentDay({ commit }, { city }) {
+    getCountry({ commit }, { code }) {
+      const country = countryProvide.getCountryByCode(code);
+      commit('setCountry', country);
+    },
+    async getCurrentDay({ commit, dispatch }, { city }) {
       try {
-        const { data } = await weatherProvide.getCurrentWeather(city, API_KEY);
+        const { data } = await weatherProvide.getCurrentWeather(city);
 
         const day = {
           weatherType: data.weather[0].main,
@@ -43,7 +45,7 @@ export default {
           datetime: datetimeNow(data.dt),
         };
 
-        commit('setCountry', data.sys.country);
+        dispatch('getCountry', {code: data.sys.country});
         commit('setCurrentDay', day);
       } catch (err) {
         commit('setCurrentDay', { error: 'City not found' });
@@ -52,7 +54,7 @@ export default {
     async getForecastDay({ commit }, { coords }) {
       try {
         const { lat, lon } = coords;
-        const { data } = await weatherProvide.getForecastWeather(lat, lon, API_KEY);
+        const { data } = await weatherProvide.getForecastWeather(lat, lon);
         const forecastDays = [];
 
         data.daily.splice(1, 7).forEach((item) => {

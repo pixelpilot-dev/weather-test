@@ -1,15 +1,16 @@
 import { api } from '../request';
+import { API_KEY } from '@/utils/openWeatherApi';
 
 /**
  * Get current weather data
  *
  * @see https://openweathermap.org/current
  */
-function getCurrentWeather(cityName, apiKey) {
+function getCurrentWeather(cityName) {
   return api.get('/weather', {
     params: {
       q: cityName,
-      appid: apiKey,
+      appid: API_KEY,
     },
   });
 }
@@ -19,12 +20,12 @@ function getCurrentWeather(cityName, apiKey) {
  *
  * @see https://openweathermap.org/api/one-call-api
  */
- function getForecastWeather(lat, lon, apiKey) {
+ function getForecastWeather(lat, lon) {
   return api.get('/onecall', {
     params: {
       lat,
       lon,
-      appid: apiKey,
+      appid: API_KEY,
     },
   });
 }
